@@ -125,8 +125,8 @@ fig,axes=plt.subplots(4,2,figsize=(12,8))
 #Percentage Of payment Methods
 Pay_per=data_cleaned.Payment_method.value_counts()*100/data_cleaned.Payment_method.count()
 #print(Pay_per)
-sns.barplot(x=Pay_per.index,y=Pay_per,color='green',ax=axes[0,0])
-axes[0,0].set_ylabel('Percentage')
+axes[0,0].pie(Pay_per,labels=Pay_per.index,explode=(0.1,0.0,0.0),autopct='%1.1f%%')
+axes[0,0].set_title('Payment Method Distribution')
 
 #Amount Spent Month wise
 monthly_g=data_cleaned.groupby('month').Amount_spent.sum()
@@ -185,11 +185,3 @@ ax2.legend(loc='upper right')
 
 plt.tight_layout(pad=1)
 plt.show()
-
-
-
-
-
-
-
-
