@@ -1,19 +1,21 @@
+#Importing required libraries
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 import seaborn as sns
 
+#Loading the dataset and seeing the information and description of the data
 online_store_df=pd.read_csv('online_store_customer_data.csv')
 print(online_store_df.info())
 print(online_store_df.describe())
 
-#Handling Missing Values
+#Handling Missing Values to ensure data consistency and avoid calculation errors
 online_store_df['Gender'].fillna('Unknown',inplace=True)
 online_store_df['Employees_status'].fillna('Unknown',inplace=True)
 online_store_df['Referal'].fillna(0, inplace=True)
 
-#Checking what null age values to replaced with
+#Checking what null age values to replaced with 
 mean_age=online_store_df['Age'].mean()
 median_age=online_store_df['Age'].median()
 ax=online_store_df['Age'].plot(kind='hist',bins=10,color='skyblue',edgecolor='black')
@@ -29,7 +31,7 @@ online_store_df['Age'].fillna(mean_age,inplace=True)
 
 
 
-#Separating Date
+#Separating Date into Day, Month and Year which enables Time-based analysis and improves filtering and aggregation
 online_store_df['Transaction_date']=pd.to_datetime(online_store_df['Transaction_date'])
 online_store_df['day']=pd.DatetimeIndex(online_store_df.Transaction_date).day
 online_store_df['month']=pd.DatetimeIndex(online_store_df.Transaction_date).month
@@ -41,17 +43,35 @@ online_store_df['year']=pd.DatetimeIndex(online_store_df.Transaction_date).year
 state_referrals = online_store_df.groupby('State_names')['Referal'].sum().sort_values(ascending=False)
 print(state_referrals.head(10))  # Show top 10 states
 
+#converts the Referal column from numerical values (0.0 and 1.0) into categorical values ('No' and 'Yes').
+#This enhnaces data visualization and maintains consistency
 online_store_df['Referal']=online_store_df['Referal'].astype(object)
 online_store_df['Referal']=online_store_df['Referal'].replace({0.0:'No',1.0:'Yes'})
 
+#Cleaning the dataset by removing rows where Amount_spent is missing and performs key analyses.
+#This Ensures Accuracy and Avoids Errors in Computation 
 data_cleaned = online_store_df.dropna(subset=['Amount_spent'])
 missing_values_after_cleaning = data_cleaned.isnull().sum()
+
+#Checking for missing values after cleaning, displaying dataset infotmation
+#Ensures all NaN values in Amount_spent have been removed.
+#Checks the total number of records left after cleaning. Ensures no missing values in critical columns.
 print(missing_values_after_cleaning)
 print(data_cleaned.info())
+
+#Counting Payment Methods
+#Identifies the most popular payment methods. Helps businesses understand customer payment preferences.
 print(data_cleaned.Payment_method.value_counts())
+
+#Identifying Top 10 States by customer count
+#Helps identify where most customers are located. Useful for regional marketing strategies.
 print(data_cleaned.State_names.value_counts().head(10))
+
+#Checking customer segments. Helps understand which customer group is most active.
 print(data_cleaned.Segment.value_counts())
 
+#Calculating the average (mean) age of customers in each state.
+#Identifies the average age of customers in different states. Helps businesses target specific age groups by location
 St_age_df=data_cleaned.groupby('State_names')[['Age']].mean()
 print(St_age_df)
 
@@ -85,12 +105,17 @@ print(segment_payment)
 referral_spending = data_cleaned.groupby('Referal')['Amount_spent'].sum()
 print(referral_spending)
 
+#Analyzing referral trends by state and identifies which states have the highest total customer transactions.
+#Identifies states with the highest customer activity. Shows how referrals impact customer transactions.
+#Helps businesses target high-traffic regions with promotions. Provides insights into how effective referrals are in each state.
 referral_counts = data_cleaned.groupby(['State_names', 'Referal']).size().unstack(fill_value=0)
 referral_counts.columns = ['No', 'Yes']
 referral_counts['Total'] = referral_counts['Yes'] + referral_counts['No']
 print(referral_counts)
 print(referral_counts.Total.nlargest(10))
 
+#Customizing the appearance of visualizations and sets up a multi-plot figure for displaying multiple charts in a grid format.
+#Allows multiple plots to be displayed in one figure.
 sns.set_style('darkgrid')
 matplotlib.rcParams['font.size']=10
 matplotlib.rcParams['figure.figsize']=(12,8)
